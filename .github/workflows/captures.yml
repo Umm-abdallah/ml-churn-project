@@ -1,0 +1,94 @@
+# Démarre la pile complète sur un runner GitHub, lance les 3 tirs JMeter et
+# prend les captures d'écran (Swagger, Grafana, Kibana, JMeter, docker compose ps).
+# Les captures sont commitées sur la branche qui a déclenché l'exécution et
+# archivées comme artefact.
+name: Captures de la pile complète
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [run-captures]
+
+permissions:
+  contents: write
+
+jobs:
+  captures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prérequis Elasticsearch
+        run: sudo sysctl -w vm.max_map_count=262144
+
+      - name: Grafana en lecture anonyme (captures uniquement)
+        run: |
+          cat > docker-compose.capture.yml <<'YML'
+          services:
+            grafana:
+              environment:
+                GF_AUTH_ANONYMOUS_ENABLED: "true"
+                GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+          YML
+
+      - name: Démarrage de la pile
+        run: docker compose -f docker-compose.yml -f docker-compose.capture.yml up -d --build
+
+      - name: Attente des services
+        run: |
+          wait_for() { for i in $(seq 1 90); do curl -fs "$1" > /dev/null && { echo "$1 OK"; return 0; }; sleep 5; done; echo "$1 KO"; return 1; }
+          wait_for http://localhost:8000/health
+          wait_for http://localhost:9200/_cluster/health
+          wait_for http://localhost:9090/-/ready
+          wait_for http://localhost:3000/api/health
+          until curl -fs http://localhost:5601/api/status | grep -q '"level":"available"'; do sleep 5; done; echo "Kibana OK"
+
+      - name: Installation de JMeter
+        run: |
+          curl -fsSL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz | tar xz -C $HOME
+          echo "$HOME/apache-jmeter-5.6.3/bin" >> $GITHUB_PATH
+
+      - name: Tirs JMeter 100, 500 et 1000 utilisateurs
+        run: ./jmeter/run_load_tests.sh localhost 8000
+
+      - name: Data view Kibana
+        run: ./scripts/kibana_setup.sh http://localhost:5601
+
+      - name: Attente de l'indexation des logs
+        run: |
+          for i in $(seq 1 60); do
+            n=$(curl -s "localhost:9200/ml-churn-logs-*/_count?q=event_type:prediction" | python3 -c "import json,sys;print(json.load(sys.stdin).get('count',0))" 2>/dev/null || echo 0)
+            echo "logs indexés : $n"; [ "$n" -gt 1000 ] && break; sleep 5
+          done
+
+      - name: Playwright
+        run: |
+          pip install playwright==1.48.0
+          python -m playwright install --with-deps chromium
+
+      - name: Captures
+        run: python scripts/capture_screens.py docs/captures
+
+      - name: État des services et volumes de logs
+        if: always()
+        run: |
+          docker compose ps
+          docker compose logs --tail 30 logstash
+
+      - name: Archiver les captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: captures
+          path: |
+            docs/captures/
+            jmeter/report-*/
+
+      - name: Commit des captures
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/captures
+          git commit -m "Captures automatiques de la pile complète" || echo "rien à commiter"
+          git push origin HEAD:${GITHUB_REF_NAME}

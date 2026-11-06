@@ -4,6 +4,8 @@ Projet fil rouge MLOps : transformer un modèle de prédiction du churn des clie
 
 Les erreurs relevées dans l'énoncé et leurs corrections sont détaillées dans [docs/CORRECTIONS.md](docs/CORRECTIONS.md). Les éléments de réponse aux questions de soutenance sont dans [docs/SOUTENANCE.md](docs/SOUTENANCE.md).
 
+Le rapport d'industrialisation et la présentation finale sont dans le dossier [livrables/](livrables/).
+
 ## Architecture
 
 ```
@@ -47,7 +49,8 @@ ml-churn-project/
 ├── scripts/                        démo, test de fumée, configuration Kibana
 ├── Dockerfile, .dockerignore, docker-compose.yml, .env.example
 ├── .github/workflows/ci.yml        pipeline CI
-└── docs/                           corrections, soutenance
+├── docs/                           corrections, soutenance, captures
+└── livrables/                      rapport d'industrialisation (PDF) et présentation finale (PPTX)
 ```
 
 ## Guide d'installation

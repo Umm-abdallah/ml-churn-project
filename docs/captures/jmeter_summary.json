@@ -1,0 +1,35 @@
+{
+  "100": {
+    "sampleCount": 1000,
+    "errorPct": 0.0,
+    "meanResTime": 5.9369999999999985,
+    "medianResTime": 4.0,
+    "pct1ResTime": 9.0,
+    "pct2ResTime": 13.0,
+    "pct3ResTime": 19.0,
+    "maxResTime": 82.0,
+    "throughput": 101.73974972021568
+  },
+  "500": {
+    "sampleCount": 5000,
+    "errorPct": 0.0,
+    "meanResTime": 1360.9530000000022,
+    "medianResTime": 1475.0,
+    "pct1ResTime": 2012.0,
+    "pct2ResTime": 2057.95,
+    "pct3ResTime": 2096.99,
+    "maxResTime": 2229.0,
+    "throughput": 216.05738484141386
+  },
+  "1000": {
+    "sampleCount": 10000,
+    "errorPct": 0.0,
+    "meanResTime": 3564.337900000003,
+    "medianResTime": 4045.0,
+    "pct1ResTime": 4438.0,
+    "pct2ResTime": 4517.949999999999,
+    "pct3ResTime": 4652.0,
+    "maxResTime": 4775.0,
+    "throughput": 221.90169754798626
+  }
+}

@@ -19,18 +19,21 @@
 
 Prometheus a été lancé ici avec le binaire officiel 2.55.1 et la cible `localhost:8000` (même configuration que dans compose, seul le nom d'hôte change).
 
-## Captures à faire sur votre machine
+## Captures de la pile complète (workflow GitHub Actions « Captures de la pile complète »)
 
-Ces outils n'ont pas pu être exécutés dans l'environnement de préparation (téléchargements bloqués). Après `docker compose up -d --build`, prendre les captures suivantes et les enregistrer sous ces noms dans `docs/captures/` :
+Prises automatiquement par `.github/workflows/captures.yml` sur un runner GitHub (Ubuntu, 4 vCPU) : la pile complète est démarrée avec `docker compose`, les 3 tirs JMeter sont lancés, puis `scripts/capture_screens.py` prend les captures avec un navigateur headless.
 
-| Fichier | Où | Quoi montrer |
-|---|---|---|
-| `03_swagger.png` | http://localhost:8000/docs | Liste des routes |
-| `05_swagger_predict.png` | /docs, POST /predict, Try it out, Execute | Réponse 200 avec prediction et probability |
-| `10_grafana_dashboard.png` | http://localhost:3000, dossier ML Churn | Dashboard complet pendant un tir JMeter |
-| `11_kibana_discover.png` | http://localhost:5601, Discover | Logs `event_type : "prediction"` avec les colonnes prediction, probability, response_time_ms |
-| `12_kibana_erreurs.png` | Discover | Recherche `level : "ERROR"` (provoquer une erreur ou montrer 0 résultat) |
-| `13_jmeter_100u.png` | `jmeter/report-100u/index.html` | Tableau Statistics |
-| `14_jmeter_500u.png` | `jmeter/report-500u/index.html` | Tableau Statistics |
-| `15_jmeter_1000u.png` | `jmeter/report-1000u/index.html` | Tableau Statistics et graphe Response Times Over Time |
-| `17_docker_ps.png` | Terminal | `docker compose ps` avec les 6 services |
+| Fichier | Contenu |
+|---|---|
+| `03_swagger.png` | Swagger UI, liste des routes |
+| `05_swagger_predict.png` | POST /predict exécuté depuis Swagger, réponse 200 |
+| `10_grafana_dashboard.png` | Dashboard Grafana sur les 15 minutes des tirs JMeter |
+| `11_kibana_discover.png` | Kibana Discover, 16 001 logs de prédiction |
+| `12_kibana_erreurs.png` | Recherche `level : "ERROR"` : aucune erreur |
+| `13_jmeter_100u.png` | Rapport JMeter, 100 utilisateurs |
+| `14_jmeter_500u.png` | Rapport JMeter, 500 utilisateurs |
+| `15_jmeter_1000u.png` | Rapport JMeter, 1000 utilisateurs |
+| `17_docker_ps.png` | Les 6 services démarrés |
+| `jmeter_summary.json` | Chiffres des 3 rapports JMeter |
+
+Pour les refaire : onglet Actions, « Captures de la pile complète », Run workflow.

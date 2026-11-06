@@ -15,6 +15,7 @@
 | `08b_prometheus_predictions.png` | Prédictions par seconde, CHURN et NO_CHURN |
 | `08c_prometheus_requetes.png` | Requêtes /predict par seconde (plafond vers 100 req/s) |
 | `09_prometheus_alertes.png` | Les 4 règles d'alerte chargées |
+| `16_github_actions.png` | Pipeline CI ML Churn #1 : 3 jobs réussis en 1 min 39 s |
 
 Prometheus a été lancé ici avec le binaire officiel 2.55.1 et la cible `localhost:8000` (même configuration que dans compose, seul le nom d'hôte change).
 
@@ -32,5 +33,4 @@ Ces outils n'ont pas pu être exécutés dans l'environnement de préparation (t
 | `13_jmeter_100u.png` | `jmeter/report-100u/index.html` | Tableau Statistics |
 | `14_jmeter_500u.png` | `jmeter/report-500u/index.html` | Tableau Statistics |
 | `15_jmeter_1000u.png` | `jmeter/report-1000u/index.html` | Tableau Statistics et graphe Response Times Over Time |
-| `16_github_actions.png` | GitHub, onglet Actions | Les 3 jobs au vert |
 | `17_docker_ps.png` | Terminal | `docker compose ps` avec les 6 services |

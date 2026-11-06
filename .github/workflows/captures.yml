@@ -62,9 +62,13 @@ jobs:
             echo "logs indexés : $n"; [ "$n" -gt 1000 ] && break; sleep 5
           done
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Playwright
         run: |
-          pip install playwright==1.48.0
+          pip install playwright
           python -m playwright install --with-deps chromium
 
       - name: Captures

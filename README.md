@@ -187,6 +187,8 @@ jmeter -t jmeter/churn_load_test.jmx
 ./jmeter/run_load_tests.sh localhost 8000
 ```
 
+Mesure préliminaire sans JMeter, même profil : `python scripts/load_probe.py http://localhost:8000 100 500 1000`.
+
 Indicateurs à relever dans chaque rapport (`jmeter/report-XXXu/index.html`) : temps moyen, médiane, 90e, 95e et 99e percentiles, débit (requêtes par seconde), pourcentage d'erreurs. Observer en parallèle le dashboard Grafana pendant le tir.
 
 ### 9. Git et GitHub

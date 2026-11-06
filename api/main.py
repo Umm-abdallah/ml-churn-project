@@ -264,6 +264,11 @@ if FRONTEND_DIR.exists():
     app.mount("/ui", StaticFiles(directory=FRONTEND_DIR, html=True), name="ui")
 
 
+# Correction : les buckets par défaut de http_request_duration_seconds s'arrêtent
+# à 1 s, donc tout percentile au delà est plafonné à 1 s dans Prometheus/Grafana
+# (constaté pendant le test de charge à 500 utilisateurs).
+LATENCY_BUCKETS = (0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 20, 30)
+
 Instrumentator(
     excluded_handlers=["/metrics"],
-).instrument(app).expose(app, include_in_schema=False)
+).instrument(app, latency_lowr_buckets=LATENCY_BUCKETS).expose(app, include_in_schema=False)

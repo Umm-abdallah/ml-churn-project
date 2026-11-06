@@ -7,7 +7,7 @@ Ce document liste les erreurs et manques relevés dans l'énoncé du projet fil 
 | Gravité | Nombre | Effet si non corrigé |
 |---|---|---|
 | Bloquant | 9 | Le pipeline ne fonctionne pas (erreur, test toujours en échec, service injoignable) |
-| Important | 12 | Fonctionne mais résultat faux, non reproductible ou non industriel |
+| Important | 14 | Fonctionne mais résultat faux, non reproductible ou non industriel |
 | Amélioration | 8 | Bonnes pratiques MLOps attendues en soutenance |
 
 ## 1. Corrections bloquantes
@@ -40,6 +40,8 @@ Ce document liste les erreurs et manques relevés dans l'énoncé du projet fil 
 | I10 | 14 | Pas de `.dockerignore` : `COPY . .` embarque `.venv`, `.git`, les logs. | `.dockerignore`, copie sélective, utilisateur non root, `HEALTHCHECK`. |
 | I11 | 16, 24 | La partie 24 annonce « Build Docker » dans la CI, mais le workflow ne le fait pas ; il ne régénère pas non plus le modèle. | Workflow en 3 jobs : tests, E2E, build Docker avec test de fumée et publication GHCR sur `main`. |
 | I12 | 18 | Arborescence JMeter incorrecte (Listener enfant du Header Manager) ; pas d'en tête `Content-Type: application/json` mentionné, donc réponses 422 ; aucune assertion, donc les erreurs ne sont pas comptées. | Plan `jmeter/churn_load_test.jmx` corrigé, paramétrable (`-Jthreads=500`) et script des 3 tirs en mode non GUI. |
+| I13 | 21, 22 | Les buckets par défaut de `http_request_duration_seconds` s'arrêtent à 1 s : pendant le test à 500 utilisateurs, le p95 affiché restait bloqué à 1,0 s alors que les requêtes duraient plusieurs secondes. | Buckets étendus jusqu'à 30 s ; p95 serveur réel mesuré à 2,44 s. |
+| I14 | 21 | Fichier de règles d'alerte référencé par un chemin absolu : `promtool check config` échoue hors du conteneur. | Chemin relatif ; configuration et 4 règles validées par `promtool`. |
 
 ## 3. Améliorations
 

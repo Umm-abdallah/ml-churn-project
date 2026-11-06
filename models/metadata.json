@@ -2,7 +2,7 @@
   "model_name": "logistic_regression",
   "model_display_name": "Logistic Regression",
   "model_version": "1.0.0",
-  "trained_at": "2026-11-06T20:07:05+00:00",
+  "trained_at": "2026-11-06T20:14:36+00:00",
   "features": [
     "age",
     "anciennete",

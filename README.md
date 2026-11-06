@@ -34,7 +34,8 @@ ml-churn-project/
 ├── api/main.py                     API FastAPI (prédiction, logs JSON, métriques)
 ├── src/generate_data.py            génération du dataset
 ├── src/train.py                    entraînement, comparaison, sélection, versionnement
-├── notebooks/exploration.py        analyse exploratoire
+├── notebooks/exploration.ipynb     notebook Data Science (EDA, comparaison, analyse du modèle)
+├── notebooks/exploration.py        version script de l'EDA (figures pour reports/)
 ├── data/raw/churn.csv              dataset (2000 clients)
 ├── models/                         model.pkl, model_v1.0.0.pkl, metadata.json
 ├── frontend/index.html             interface web (servie sur /ui/)
@@ -81,6 +82,7 @@ pip install -r requirements-dev.txt
 ```bash
 python src/generate_data.py        # data/raw/churn.csv
 python notebooks/exploration.py    # figures dans reports/figures/
+jupyter notebook notebooks/exploration.ipynb   # notebook complet, déjà exécuté avec ses sorties
 python src/train.py                # models/model.pkl + metadata.json
 ```
 

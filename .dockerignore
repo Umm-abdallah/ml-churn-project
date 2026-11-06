@@ -1,0 +1,22 @@
+# Correction : sans ce fichier, "COPY . ." envoie .venv, .git, les logs et les
+# résultats de tests dans l'image (image lourde et fuite d'informations).
+.venv
+venv
+.git
+.github
+.gitignore
+**/__pycache__
+**/*.pyc
+.pytest_cache
+logs
+jmeter
+reports
+docs
+monitoring
+docker
+notebooks
+tests
+data
+models
+*.md
+.env

@@ -1,0 +1,7 @@
+# Dépendances de développement : exploration, tests unitaires, API et E2E.
+-r requirements.txt
+matplotlib==3.11.2
+seaborn==0.13.2
+pytest==9.1.1
+httpx2==2.13.1
+selenium==4.52.0

@@ -1,0 +1,21 @@
+# Environnements et caches
+.venv/
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.env
+
+# Logs d'exécution (collectés par ELK, pas versionnés)
+logs/*.log
+
+# Résultats JMeter (régénérés à chaque tir)
+jmeter/results/
+jmeter/report*/
+*.jtl
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store

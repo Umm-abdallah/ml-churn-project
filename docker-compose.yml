@@ -1,0 +1,119 @@
+# Pile complète : API + ELK (logs) + Prometheus/Grafana (métriques).
+#
+# Corrections par rapport à l'énoncé :
+# * un seul fichier compose enrichi (la partie 20 disait de le « créer » à
+#   nouveau, ce qui écrasait le service api) ;
+# * Prometheus et Grafana sont dans le même réseau compose que l'API : avec un
+#   « docker run grafana » isolé, les noms api et prometheus ne se résolvent pas ;
+# * Grafana est provisionné automatiquement (datasource + dashboard) ;
+# * la configuration ELK manquante est fournie (Logstash lit le fichier de logs
+#   JSON écrit par l'API dans un volume partagé) ;
+# * healthchecks et depends_on pour l'ordre de démarrage.
+#
+# Démarrer uniquement l'API (partie 15) :  docker compose up -d api
+# Démarrer toute la pile :                 docker compose up -d
+# Prérequis Elasticsearch sous Linux :     sudo sysctl -w vm.max_map_count=262144
+
+name: ml-churn
+
+services:
+
+  api:
+    build:
+      context: .
+      args:
+        MODEL_VERSION: ${MODEL_VERSION:-1.0.0}
+    image: ml-churn-api:${MODEL_VERSION:-1.0.0}
+    container_name: ml-churn-api
+    ports:
+      - "8000:8000"
+    environment:
+      LOG_LEVEL: INFO
+      LOG_FILE: /app/logs/api.log
+    volumes:
+      - api-logs:/app/logs
+    restart: unless-stopped
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELK_VERSION:-8.15.3}
+    container_name: ml-churn-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"      # TP uniquement : à activer en production
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:${ELK_VERSION:-8.15.3}
+    container_name: ml-churn-logstash
+    environment:
+      LS_JAVA_OPTS: -Xms256m -Xmx256m
+    volumes:
+      - ./docker/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./docker/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - api-logs:/logs:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      api:
+        condition: service_started
+    restart: unless-stopped
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELK_VERSION:-8.15.3}
+    container_name: ml-churn-kibana
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:${PROMETHEUS_VERSION:-v2.55.1}
+    container_name: ml-churn-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=15d
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:${GRAFANA_VERSION:-11.3.0}
+    container_name: ml-churn-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  api-logs:
+  es-data:
+  prometheus-data:
+  grafana-data:

@@ -1,0 +1,14 @@
+# Dépendances d'exécution de l'API (image Docker).
+# Correction : versions épinglées à la main au lieu de "pip freeze", qui capture
+# tout l'environnement local (outils, dépendances transitives, versions liées à
+# la version locale de Python) et rend l'image non reproductible.
+# Versions vérifiées pour Python 3.12 (Ubuntu 24.04, image python:3.12-slim, CI).
+pandas==3.0.5
+numpy==2.5.3
+scikit-learn==1.9.1
+joblib==1.6.0
+fastapi==0.162.0
+uvicorn==0.54.0
+pydantic==2.13.5
+prometheus_client==0.26.0
+prometheus-fastapi-instrumentator==8.1.0

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prédiction du churn client</title>
+  <style>
+    :root { --accent: #FF7900; --ok: #50BE87; --ko: #E5484D; --muted: #595959; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Helvetica, Arial, sans-serif; background: #F4F4F4; color: #111; }
+    header { background: #000; color: #fff; padding: 18px 32px; }
+    header h1 { margin: 0; font-size: 20px; }
+    header span { color: var(--accent); }
+    main { max-width: 760px; margin: 32px auto; padding: 0 16px; }
+    .card { background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    label { display: flex; flex-direction: column; font-size: 13px; color: var(--muted); gap: 6px; }
+    input { padding: 10px; border: 1px solid #D6D6D6; border-radius: 6px; font-size: 15px; }
+    input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    button { grid-column: 1 / -1; padding: 12px; background: var(--accent); color: #fff; border: 0;
+             border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: wait; }
+    #result { margin-top: 20px; padding: 18px; border-radius: 8px; display: none; }
+    #result.churn { display: block; background: #FDECEC; border-left: 6px solid var(--ko); }
+    #result.nochurn { display: block; background: #EAF7F0; border-left: 6px solid var(--ok); }
+    #result.error { display: block; background: #FFF4E5; border-left: 6px solid var(--accent); }
+    #prediction { font-size: 22px; font-weight: bold; margin: 0 0 6px; }
+    .meta { font-size: 13px; color: var(--muted); }
+    .bar { height: 10px; background: #EEE; border-radius: 5px; overflow: hidden; margin: 10px 0; }
+    .bar div { height: 100%; background: var(--accent); width: 0; transition: width .4s; }
+  </style>
+</head>
+<body>
+<header><h1>Churn <span>Prediction</span> : scoring du risque de départ client</h1></header>
+<main>
+  <div class="card">
+    <form id="client-form">
+      <label>Âge <input id="age" name="age" type="number" min="18" max="100" value="35" required></label>
+      <label>Ancienneté (mois) <input id="anciennete" name="anciennete" type="number" min="0" value="5" required></label>
+      <label>Revenu <input id="revenu" name="revenu" type="number" min="0" value="450000" required></label>
+      <label>Nombre de réclamations <input id="nb_reclamations" name="nb_reclamations" type="number" min="0" value="2" required></label>
+      <label>Montant mensuel <input id="montant_mensuel" name="montant_mensuel" type="number" min="0" value="25000" required></label>
+      <label>Retards de paiement <input id="retards_paiement" name="retards_paiement" type="number" min="0" value="2" required></label>
+      <button id="predict-btn" type="submit">Prédire</button>
+    </form>
+    <div id="result" role="status" aria-live="polite">
+      <p id="prediction"></p>
+      <div class="bar"><div id="proba-bar"></div></div>
+      <p class="meta">Probabilité de churn : <strong id="probability"></strong></p>
+      <p class="meta" id="meta"></p>
+    </div>
+  </div>
+</main>
+<script>
+  const form = document.getElementById("client-form");
+  const btn = document.getElementById("predict-btn");
+  const box = document.getElementById("result");
+  const ints = ["age", "anciennete", "nb_reclamations", "retards_paiement"];
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = {};
+    for (const [k, v] of new FormData(form).entries()) {
+      payload[k] = ints.includes(k) ? parseInt(v, 10) : parseFloat(v);
+    }
+    btn.disabled = true;
+    try {
+      const res = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(JSON.stringify(data.detail || data));
+      const churn = data.prediction === "CHURN";
+      box.className = churn ? "churn" : "nochurn";
+      document.getElementById("prediction").textContent =
+        churn ? "CHURN : client à risque" : "NO_CHURN : client fidèle";
+      document.getElementById("probability").textContent =
+        (data.probability * 100).toFixed(1) + " %";
+      document.getElementById("proba-bar").style.width = (data.probability * 100) + "%";
+      document.getElementById("meta").textContent =
+        `Modèle v${data.model_version} · ${data.duration_ms} ms · requête ${data.request_id}`;
+    } catch (err) {
+      box.className = "error";
+      document.getElementById("prediction").textContent = "Erreur";
+      document.getElementById("probability").textContent = "";
+      document.getElementById("meta").textContent = err.message;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

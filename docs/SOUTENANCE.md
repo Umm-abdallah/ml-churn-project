@@ -1,6 +1,5 @@
 # Éléments de réponse aux questions de soutenance
 
-Réponses courtes, appuyées sur ce qui a été réellement fait dans le projet. À reformuler avec ses propres mots.
 
 ## Data Science
 

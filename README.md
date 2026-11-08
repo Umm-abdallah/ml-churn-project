@@ -224,7 +224,7 @@ docker compose up -d --build api   # ou toute la pile
 ./scripts/smoke_test.sh http://SERVER_IP:8000
 ```
 
-Variante sans build sur la VM : utiliser l'image publiée par la CI, `docker pull ghcr.io/<votre-compte>/ml-churn-project:latest`.
+Variante sans build sur la VM : utiliser l'image publiée par la CI, `docker pull ghcr.io/umm-abdallah/ml-churn-project:latest`.
 
 ## Pipeline CI (GitHub Actions)
 
